@@ -194,7 +194,33 @@ body {
     cursor: pointer;
     font-size: 16px;
 }
+/* مؤشر الكتابة */
+#typing-indicator {
+    padding: 5px 10px;
+    font-style: italic;
+    color: #666;
+    font-size: 14px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    display: inline-block;
+    margin: 5px 0;
+}
 
+/* تحسينات للرسائل */
+.message.sent .message-header {
+    color: white;
+}
+
+.message.received .message-header {
+    color: #6a11cb;
+}
+
+/* تأثيرات عند المرور */
+#online-users li:hover {
+    background: #e3f2fd;
+    transform: translateX(-5px);
+    transition: all 0.3s;
+}
 /* تصميم متجاوب */
 @media (max-width: 768px) {
     .chat-sidebar {
