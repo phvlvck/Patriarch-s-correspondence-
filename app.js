@@ -1,20 +1,36 @@
-let socket;
-let currentUser = null;
+// ... الكود السابق يبقى كما هو حتى دالة login ...
 
-// عرض نموذج التسجيل
-function showRegister() {
-    document.getElementById('login-section').style.display = 'none';
-    document.getElementById('register-section').style.display = 'block';
+// تسجيل الدخول (محدث للعمل مع Python)
+async function login() {
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+        
+        if(data.success) {
+            currentUser = username;
+            localStorage.setItem('currentUser', username);
+            startChat();
+        } else {
+            alert(data.message);
+        }
+    } catch(error) {
+        console.error('Error:', error);
+        alert('خطأ في الاتصال بالسيرفر');
+    }
 }
 
-// عرض نموذج الدخول
-function showLogin() {
-    document.getElementById('register-section').style.display = 'none';
-    document.getElementById('login-section').style.display = 'block';
-}
-
-// تسجيل مستخدم جديد
-function register() {
+// التسجيل (محدث)
+async function register() {
     const username = document.getElementById('register-username').value;
     const password = document.getElementById('register-password').value;
     const email = document.getElementById('register-email').value;
@@ -24,45 +40,37 @@ function register() {
         return;
     }
 
-    // حفظ المستخدم في localStorage (في تطبيق حقيقي، سيكون في قاعدة بيانات)
-    const users = JSON.parse(localStorage.getItem('chat_users') || '{}');
-    if(users[username]) {
-        alert('اسم المستخدم موجود بالفعل!');
-        return;
-    }
+    try {
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password, email })
+        });
 
-    users[username] = { password, email };
-    localStorage.setItem('chat_users', JSON.stringify(users));
-    alert('تم التسجيل بنجاح! يمكنك الآن الدخول.');
-    showLogin();
-}
-
-// تسجيل الدخول
-function login() {
-    const username = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
-
-    const users = JSON.parse(localStorage.getItem('chat_users') || '{}');
-    
-    if(users[username] && users[username].password === password) {
-        currentUser = username;
-        localStorage.setItem('currentUser', username);
-        startChat();
-    } else {
-        alert('اسم المستخدم أو كلمة المرور غير صحيحة!');
+        const data = await response.json();
+        alert(data.message);
+        
+        if(data.success) {
+            showLogin();
+        }
+    } catch(error) {
+        console.error('Error:', error);
+        alert('خطأ في الاتصال بالسيرفر');
     }
 }
 
-// بدء الدردشة
+// بدء الدردشة (محدث)
 function startChat() {
     document.getElementById('auth-container').style.display = 'none';
     document.getElementById('chat-container').style.display = 'block';
 
-    // الاتصال بالسيرفر
-    socket = io('https://your-server-url.herokuapp.com'); // سيتم تغيير هذا لاحقاً
+    // الاتصال بالسيرفر Python
+    socket = io(); // سيصل تلقائياً إلى نفس النطاق
 
     // إرسال اسم المستخدم للسيرفر
-    socket.emit('user_connected', currentUser);
+    socket.emit('user_connected', { username: currentUser });
 
     // تحديث قائمة المستخدمين المتصلين
     socket.on('user_list', (users) => {
@@ -79,124 +87,67 @@ function startChat() {
         addSystemMessage(message);
     });
 
-    // تحميل الرسائل السابقة
-    loadMessages();
-}
+    // معرفة من يكتب الآن
+    socket.on('user_typing', (data) => {
+        showTypingIndicator(data.user, data.isTyping);
+    });
 
-// إرسال رسالة
-function sendMessage() {
-    const input = document.getElementById('message-input');
-    const message = input.value.trim();
-    
-    if(message && currentUser) {
-        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        // إرسال للسيرفر
-        socket.emit('send_message', {
-            user: currentUser,
-            message: message,
-            time: time
-        });
-
-        // إضافة للواجهة مباشرة
-        addMessage(currentUser, message, time, true);
-        
-        // حفظ في localStorage
-        saveMessage(currentUser, message, time);
-        
-        input.value = '';
-    }
-}
-
-// إضافة رسالة للواجهة
-function addMessage(user, message, time, isSent = false) {
-    const messagesDiv = document.getElementById('chat-messages');
-    const messageClass = isSent ? 'sent' : 'received';
-    
-    const messageHTML = `
-        <div class="message ${messageClass}">
-            <div class="message-header">${user}</div>
-            <div class="message-text">${message}</div>
-            <div class="message-time">${time}</div>
-        </div>
-    `;
-    
-    messagesDiv.innerHTML += messageHTML;
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-// إضافة رسالة نظام
-function addSystemMessage(message) {
-    const messagesDiv = document.getElementById('chat-messages');
-    const messageHTML = `
-        <div class="message" style="background:#ffecb3;color:#333;max-width:100%;margin:10px auto;text-align:center;">
-            <i class="fas fa-info-circle"></i> ${message}
-        </div>
-    `;
-    
-    messagesDiv.innerHTML += messageHTML;
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-// تحديث قائمة المستخدمين المتصلين
-function updateOnlineUsers(users) {
-    const usersList = document.getElementById('online-users');
-    const onlineCount = document.getElementById('online-count');
-    
-    usersList.innerHTML = '';
-    onlineCount.textContent = users.length;
-    
-    users.forEach(user => {
-        const li = document.createElement('li');
-        li.innerHTML = `<i class="fas fa-user-circle"></i> ${user}`;
-        usersList.appendChild(li);
+    // إضافة مؤشر الكتابة
+    let typingTimeout;
+    document.getElementById('message-input').addEventListener('input', function() {
+        if(currentUser) {
+            socket.emit('typing', { user: currentUser, isTyping: true });
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit('typing', { user: currentUser, isTyping: false });
+            }, 1000);
+        }
     });
 }
 
-// حفظ الرسائل
-function saveMessage(user, message, time) {
-    const messages = JSON.parse(localStorage.getItem('chat_messages') || '[]');
-    messages.push({ user, message, time, timestamp: Date.now() });
+// عرض مؤشر الكتابة
+function showTypingIndicator(username, isTyping) {
+    let indicator = document.getElementById('typing-indicator');
     
-    // حفظ آخر 100 رسالة فقط
-    if(messages.length > 100) {
-        messages.splice(0, messages.length - 100);
+    if(!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'typing-indicator';
+        indicator.style.cssText = `
+            padding: 5px 10px;
+            font-style: italic;
+            color: #666;
+            font-size: 14px;
+        `;
+        document.getElementById('chat-messages').appendChild(indicator);
     }
     
-    localStorage.setItem('chat_messages', JSON.stringify(messages));
-}
-
-// تحميل الرسائل السابقة
-function loadMessages() {
-    const messages = JSON.parse(localStorage.getItem('chat_messages') || '[]');
-    messages.forEach(msg => {
-        addMessage(msg.user, msg.message, msg.time, msg.user === currentUser);
-    });
-}
-
-// التعامل مع زر الإدخال
-function handleKeyPress(event) {
-    if(event.key === 'Enter') {
-        sendMessage();
+    if(isTyping) {
+        indicator.textContent = `${username} يكتب الآن...`;
+        indicator.style.display = 'block';
+    } else {
+        indicator.style.display = 'none';
     }
 }
 
-// تسجيل الخروج
-function logout() {
-    if(socket) {
-        socket.emit('user_disconnected', currentUser);
-        socket.disconnect();
+// ... باقي الدوال تبقى كما هي ...
+
+// إضافة تحميل المستخدمين عند البدء
+async function loadAllUsers() {
+    try {
+        const response = await fetch('/api/users');
+        const users = await response.json();
+        console.log('المستخدمون المسجلون:', users);
+    } catch(error) {
+        console.error('Error loading users:', error);
     }
-    
-    localStorage.removeItem('currentUser');
-    location.reload();
 }
 
-// التحقق من تسجيل الدخول السابق
 window.onload = function() {
     const savedUser = localStorage.getItem('currentUser');
     if(savedUser) {
         currentUser = savedUser;
         startChat();
     }
+    loadAllUsers();
 };
