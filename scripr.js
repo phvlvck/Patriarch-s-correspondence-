@@ -8,14 +8,14 @@ const SERVER_CONFIG = {
     SERVER_URL: 'http://localhost:8080'
 };
 
-// 2. للتشغيل على شبكة محلية (لوصل جهازين):
-// const SERVER_CONFIG = {
-//     WS_URL: 'ws://192.168.1.100:8080/ws',  // ضع IP جهاز السيرفر
-//     API_URL: 'http://192.168.1.100:8080/api',
-//     SERVER_URL: 'http://192.168.1.100:8080'
-// };
+ 2. للتشغيل على شبكة محلية (لوصل جهازين):
+ const SERVER_CONFIG = {
+     WS_URL: 'ws://192.168.1.100:8080/ws',  // ضع IP جهاز السيرفر
+     API_URL: 'http://192.168.1.100:8080/api',
+     SERVER_URL: 'http://192.168.1.100:8080'
+ };
 
-// 3. للسيرفر المنشور على Render.com:
+ //3. للسيرفر المنشور على Render.com:
 // const SERVER_CONFIG = {
 //     WS_URL: 'wss://iraqi-chat.onrender.com/ws',
 //     API_URL: 'https://iraqi-chat.onrender.com/api',
@@ -23,10 +23,10 @@ const SERVER_CONFIG = {
 // };
 
 // 4. للسيرفر المنشور على PythonAnywhere:
-// const SERVER_CONFIG = {
-//     WS_URL: 'wss://username.pythonanywhere.com/ws',
-//     API_URL: 'https://username.pythonanywhere.com/api',
-//     SERVER_URL: 'https://username.pythonanywhere.com'
+ //const SERVER_CONFIG = {
+    // WS_URL: 'wss://username.pythonanywhere.com/ws',
+ //    API_URL: 'https://username.pythonanywhere.com/api',
+ //    SERVER_URL: 'https://username.pythonanywhere.com'
 // };
 
 // ===== إعدادات التطبيق =====
