@@ -14,76 +14,193 @@
     
     <!-- Language Selector -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons/css/flag-icons.min.css">
+    
+    <!-- حل نهائي لمشكلة التحميل -->
+    <style>
+        /* حل فوري لشاشة التحميل */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #0f1e29;
+            color: #e9edef;
+            direction: rtl;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f1e29 0%, #17212b 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        #loadingScreen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loading-content {
+            text-align: center;
+            max-width: 400px;
+            padding: 40px;
+            background: rgba(32, 44, 51, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid #2a3942;
+        }
+        
+        .logo-animation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .logo-animation i {
+            font-size: 5rem;
+            color: #0088cc;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                color: #0088cc;
+            }
+            50% { 
+                transform: scale(1.1);
+                color: #00d4aa;
+            }
+        }
+        
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #0088cc, #00d4aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .loading-progress {
+            width: 100%;
+            height: 6px;
+            background: #2a3942;
+            border-radius: 3px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0088cc, #00d4aa);
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .loading-text {
+            color: #8696a0;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+        
+        /* إخفاء التطبيق أثناء التحميل */
+        #app {
+            display: none;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #app.ready {
+            display: flex;
+        }
+    </style>
 </head>
 <body>
-    <!-- Language Selector -->
-    <div class="language-selector">
-        <div class="current-language" onclick="toggleLanguageMenu()">
-            <span class="fi fi-iq" id="currentFlag"></span>
-            <span id="currentLang">العربية</span>
-            <i class="fas fa-chevron-down"></i>
-        </div>
-        <div class="language-menu" id="languageMenu">
-            <div class="language-option" onclick="changeLanguage('ar')">
-                <span class="fi fi-iq"></span>
-                <span>العربية</span>
-            </div>
-            <div class="language-option" onclick="changeLanguage('en')">
-                <span class="fi fi-us"></span>
-                <span>English</span>
-            </div>
-            <div class="language-option" onclick="changeLanguage('ku')">
-                <span class="fi fi-iq"></span>
-                <span>Kurdî</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Loading Screen -->
+    <!-- شاشة التحميل -->
     <div id="loadingScreen">
         <div class="loading-content">
             <div class="logo-animation">
                 <i class="fas fa-comments"></i>
                 <span class="logo-text">دردشة العراق</span>
             </div>
+            <p class="loading-text">🚀 جاري تحميل التطبيق...</p>
             <div class="loading-progress">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
-            <p class="loading-text" id="loadingText">جاري التحميل...</p>
+            <p id="loadingStatus">تهيئة البيانات...</p>
         </div>
     </div>
 
-    <!-- App Container -->
-    <div id="app" style="display: none;">
+    <!-- التطبيق -->
+    <div id="app">
+        <!-- Language Selector -->
+        <div class="language-selector">
+            <div class="current-language" onclick="toggleLanguageMenu()">
+                <span class="fi fi-iq" id="currentFlag"></span>
+                <span id="currentLang">العربية</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="language-menu" id="languageMenu">
+                <div class="language-option" onclick="changeLanguage('ar')">
+                    <span class="fi fi-iq"></span>
+                    <span>العربية</span>
+                </div>
+                <div class="language-option" onclick="changeLanguage('en')">
+                    <span class="fi fi-us"></span>
+                    <span>English</span>
+                </div>
+                <div class="language-option" onclick="changeLanguage('ku')">
+                    <span class="fi fi-iq"></span>
+                    <span>Kurdî</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
+        <div class="sidebar">
             <!-- Sidebar Header -->
             <div class="sidebar-header">
                 <div class="user-profile" onclick="toggleUserMenu()">
-                    <img id="userAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Default" alt="Avatar" class="avatar">
+                    <img id="userAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" alt="Avatar" class="avatar">
                     <div class="user-info">
                         <h3 id="userName">زائر</h3>
-                        <p id="userStatus" class="status online">جاري الاتصال...</p>
+                        <p id="userStatus" class="status offline">غير متصل</p>
                     </div>
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="user-menu" id="userMenu">
                     <div class="menu-item" onclick="showPage('profile')">
                         <i class="fas fa-user"></i>
-                        <span data-lang="profile">الملف الشخصي</span>
+                        <span>الملف الشخصي</span>
                     </div>
                     <div class="menu-item" onclick="showPage('settings')">
                         <i class="fas fa-cog"></i>
-                        <span data-lang="settings">الإعدادات</span>
+                        <span>الإعدادات</span>
                     </div>
-                    <div class="menu-item" onclick="showPage('admin')" id="adminMenuItem" style="display: none;">
+                    <div class="menu-item" id="adminMenuItem" style="display: none;" onclick="showPage('admin')">
                         <i class="fas fa-shield-alt"></i>
-                        <span data-lang="admin">لوحة المشرف</span>
+                        <span>لوحة المشرف</span>
                     </div>
                     <div class="menu-divider"></div>
                     <div class="menu-item logout" onclick="logout()">
                         <i class="fas fa-sign-out-alt"></i>
-                        <span data-lang="logout">تسجيل الخروج</span>
+                        <span>تسجيل الخروج</span>
                     </div>
                 </div>
                 <button class="new-chat-btn" onclick="showNewChatModal()">
@@ -101,81 +218,97 @@
 
             <!-- Chat List -->
             <div class="chat-list" id="chatList">
-                <!-- Chats will be loaded here -->
+                <!-- سيتم تحميل المحادثات هنا -->
+                <div class="chat-item" onclick="startChatWith('1')">
+                    <div class="chat-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed" alt="Avatar" class="avatar">
+                        <div class="online-indicator"></div>
+                    </div>
+                    <div class="chat-info">
+                        <div class="chat-header">
+                            <h4>أحمد العراقي</h4>
+                            <span class="chat-time">اليوم</span>
+                        </div>
+                        <div class="chat-preview">
+                            <p>مرحباً بك في دردشة العراق!</p>
+                            <span class="unread-badge">2</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Bottom Navigation -->
             <div class="sidebar-footer">
                 <button class="nav-btn active" onclick="showPage('chats')">
                     <i class="fas fa-comments"></i>
-                    <span data-lang="chats">المحادثات</span>
+                    <span>المحادثات</span>
                 </button>
                 <button class="nav-btn" onclick="showPage('contacts')">
                     <i class="fas fa-users"></i>
-                    <span data-lang="contacts">جهات الاتصال</span>
+                    <span>جهات الاتصال</span>
                 </button>
                 <button class="nav-btn" onclick="showPage('discover')">
                     <i class="fas fa-compass"></i>
-                    <span data-lang="discover">اكتشف</span>
+                    <span>اكتشف</span>
                 </button>
             </div>
         </div>
 
-        <!-- Main Content Area -->
+        <!-- Main Content -->
         <div class="main-content">
             <!-- Welcome Screen -->
-            <div class="welcome-screen" id="welcomeScreen">
+            <div class="welcome-screen active" id="welcomeScreen">
                 <div class="welcome-content">
                     <div class="welcome-logo">
                         <i class="fas fa-comments"></i>
-                        <h1 data-lang="welcome_title">دردشة العراق</h1>
+                        <h1>دردشة العراق</h1>
                     </div>
-                    <p class="welcome-subtitle" data-lang="welcome_subtitle">
+                    <p class="welcome-subtitle">
                         منصة التواصل العراقية الأولى للتعارف والصداقات
                     </p>
                     
                     <div class="auth-buttons">
                         <button class="auth-btn primary" onclick="showAuthModal('register')">
                             <i class="fas fa-user-plus"></i>
-                            <span data-lang="create_account">إنشاء حساب جديد</span>
+                            <span>إنشاء حساب جديد</span>
                         </button>
                         <button class="auth-btn secondary" onclick="showAuthModal('login')">
                             <i class="fas fa-sign-in-alt"></i>
-                            <span data-lang="login">تسجيل الدخول</span>
+                            <span>تسجيل الدخول</span>
                         </button>
                     </div>
 
                     <div class="features">
                         <div class="feature">
                             <i class="fas fa-shield-alt"></i>
-                            <h3 data-lang="feature1_title">آمن ومحمي</h3>
-                            <p data-lang="feature1_desc">حماية بياناتك هي أولويتنا</p>
+                            <h3>آمن ومحمي</h3>
+                            <p>حماية بياناتك هي أولويتنا</p>
                         </div>
                         <div class="feature">
                             <i class="fas fa-bolt"></i>
-                            <h3 data-lang="feature2_title">سريع ومباشر</h3>
-                            <p data-lang="feature2_desc">دردشة فورية بدون تأخير</p>
+                            <h3>سريع ومباشر</h3>
+                            <p>دردشة فورية بدون تأخير</p>
                         </div>
                         <div class="feature">
                             <i class="fas fa-users"></i>
-                            <h3 data-lang="feature3_title">تواصل حقيقي</h3>
-                            <p data-lang="feature3_desc">تعرف على أشخاص حقيقيين</p>
+                            <h3>تواصل حقيقي</h3>
+                            <p>تعرف على أشخاص حقيقيين</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Chat Screen -->
-            <div class="chat-screen" id="chatScreen" style="display: none;">
+            <div class="chat-screen" id="chatScreen">
                 <div class="chat-header">
                     <button class="back-btn" onclick="closeChat()">
                         <i class="fas fa-arrow-right"></i>
                     </button>
                     <div class="chat-info">
-                        <img id="chatAvatar" src="" alt="" class="avatar">
+                        <img id="chatAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=User" alt="" class="avatar">
                         <div class="chat-details">
-                            <h3 id="chatUserName"></h3>
-                            <p id="chatUserStatus" class="status"></p>
+                            <h3 id="chatUserName">محادثة جديدة</h3>
+                            <p id="chatUserStatus" class="status online">متصل</p>
                         </div>
                     </div>
                     <div class="chat-actions">
@@ -189,7 +322,15 @@
                 </div>
 
                 <div class="chat-messages" id="chatMessages">
-                    <!-- Messages will be loaded here -->
+                    <!-- الرسائل ستظهر هنا -->
+                    <div class="message received">
+                        <div class="message-content">
+                            مرحباً بك في دردشة العراق! 👋
+                        </div>
+                        <div class="message-time">
+                            10:00 ص
+                        </div>
+                    </div>
                 </div>
 
                 <div class="chat-input">
@@ -219,16 +360,29 @@
             </div>
 
             <!-- Other Pages -->
-            <div class="page" id="profilePage" style="display: none;"></div>
-            <div class="page" id="contactsPage" style="display: none;"></div>
-            <div class="page" id="discoverPage" style="display: none;"></div>
-            <div class="page" id="settingsPage" style="display: none;"></div>
-            <div class="page" id="adminPage" style="display: none;"></div>
-        </div>
-
-        <!-- Chat Info Panel -->
-        <div class="chat-info-panel" id="chatInfoPanel">
-            <!-- Chat info will be loaded here -->
+            <div class="page" id="profilePage" style="display: none;">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('chats')">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <h2>الملف الشخصي</h2>
+                </div>
+                <div class="page-content">
+                    <!-- محتوى الصفحة -->
+                </div>
+            </div>
+            
+            <div class="page" id="contactsPage" style="display: none;">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('chats')">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <h2>جهات الاتصال</h2>
+                </div>
+                <div class="page-content">
+                    <!-- محتوى الصفحة -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -243,59 +397,59 @@
                 <div class="auth-tabs">
                     <button class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">
                         <i class="fas fa-sign-in-alt"></i>
-                        <span data-lang="login">تسجيل الدخول</span>
+                        <span>تسجيل الدخول</span>
                     </button>
                     <button class="auth-tab" id="registerTab" onclick="switchAuthTab('register')">
                         <i class="fas fa-user-plus"></i>
-                        <span data-lang="register">إنشاء حساب</span>
+                        <span>إنشاء حساب</span>
                     </button>
                 </div>
 
                 <form id="loginForm" class="auth-form active">
                     <div class="form-group">
-                        <label for="loginEmail" data-lang="email">البريد الإلكتروني</label>
-                        <input type="email" id="loginEmail" required>
+                        <label for="loginEmail">البريد الإلكتروني</label>
+                        <input type="email" id="loginEmail" placeholder="example@iraqichat.com" required>
                     </div>
                     <div class="form-group">
-                        <label for="loginPassword" data-lang="password">كلمة المرور</label>
-                        <input type="password" id="loginPassword" required>
+                        <label for="loginPassword">كلمة المرور</label>
+                        <input type="password" id="loginPassword" placeholder="********" required>
                         <button type="button" class="show-password" onclick="togglePassword('loginPassword')">
                             <i class="far fa-eye"></i>
                         </button>
                     </div>
-                    <button type="submit" class="submit-btn" data-lang="login">تسجيل الدخول</button>
+                    <button type="submit" class="submit-btn">تسجيل الدخول</button>
                 </form>
 
                 <form id="registerForm" class="auth-form">
                     <div class="form-group">
-                        <label for="registerName" data-lang="full_name">الاسم الكامل</label>
-                        <input type="text" id="registerName" required>
+                        <label for="registerName">الاسم الكامل</label>
+                        <input type="text" id="registerName" placeholder="أحمد العراقي" required>
                     </div>
                     <div class="form-group">
-                        <label for="registerUsername" data-lang="username">اسم المستخدم</label>
-                        <input type="text" id="registerUsername" required>
+                        <label for="registerUsername">اسم المستخدم</label>
+                        <input type="text" id="registerUsername" placeholder="ahmediraqi" required>
                     </div>
                     <div class="form-group">
-                        <label for="registerEmail" data-lang="email">البريد الإلكتروني</label>
-                        <input type="email" id="registerEmail" required>
+                        <label for="registerEmail">البريد الإلكتروني</label>
+                        <input type="email" id="registerEmail" placeholder="example@iraqichat.com" required>
                     </div>
                     <div class="form-group">
-                        <label for="registerPassword" data-lang="password">كلمة المرور</label>
-                        <input type="password" id="registerPassword" required minlength="6">
+                        <label for="registerPassword">كلمة المرور</label>
+                        <input type="password" id="registerPassword" placeholder="********" required minlength="6">
                         <button type="button" class="show-password" onclick="togglePassword('registerPassword')">
                             <i class="far fa-eye"></i>
                         </button>
                     </div>
                     <div class="form-group">
-                        <label for="registerConfirmPassword" data-lang="confirm_password">تأكيد كلمة المرور</label>
-                        <input type="password" id="registerConfirmPassword" required>
+                        <label for="registerConfirmPassword">تأكيد كلمة المرور</label>
+                        <input type="password" id="registerConfirmPassword" placeholder="********" required>
                     </div>
                     <div class="form-group">
-                        <label for="registerAge" data-lang="age">العمر</label>
-                        <input type="number" id="registerAge" min="13" max="100">
+                        <label for="registerAge">العمر</label>
+                        <input type="number" id="registerAge" min="13" max="100" placeholder="25">
                     </div>
                     <div class="form-group">
-                        <label for="registerCity" data-lang="city">المدينة</label>
+                        <label for="registerCity">المدينة</label>
                         <select id="registerCity">
                             <option value="">اختر المدينة</option>
                             <option value="بغداد">بغداد</option>
@@ -308,40 +462,16 @@
                             <option value="بابل">بابل</option>
                         </select>
                     </div>
-                    <button type="submit" class="submit-btn" data-lang="create_account">إنشاء حساب</button>
+                    <button type="submit" class="submit-btn">إنشاء حساب</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- New Chat Modal -->
-    <div class="modal" id="newChatModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 data-lang="new_chat">محادثة جديدة</h2>
-                <button class="close-btn" onclick="closeNewChatModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchUsers" placeholder="ابحث عن مستخدم..." oninput="searchUsers()">
-                </div>
-                <div class="users-list" id="usersList">
-                    <!-- Users will be loaded here -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Emoji Picker -->
-    <div class="emoji-picker" id="emojiPicker">
-        <!-- Emojis will be loaded here -->
-    </div>
-
     <!-- Notification Center -->
     <div class="notification-center" id="notificationCenter"></div>
 
-    <!-- WebSocket Status -->
+    <!-- Connection Status -->
     <div class="connection-status" id="connectionStatus">
         <i class="fas fa-wifi"></i>
         <span>جاري الاتصال...</span>
@@ -351,277 +481,410 @@
     <script src="languages.js"></script>
     <script src="script.js"></script>
     
-    <!-- Emoji Picker Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@emoji-mart/data"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@emoji-mart/web"></script>
-</body>
+    <!-- Loader Script -->
     <script>
-// ===== الحل النهائي لمشكلة التحميل =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 الصفحة محملة - بدء حل مشكلة التحميل...');
-    
-    // الحل الفوري: إخفاء شاشة التحميل بعد تأخير قصير
-    setTimeout(hideLoadingScreen, 500);
-    
-    // بديل: إذا فشل الحل الأول، إعادة المحاولة
-    setTimeout(hideLoadingScreen, 2000);
-    setTimeout(hideLoadingScreen, 3000);
-});
-
-function hideLoadingScreen() {
-    console.log('🔄 محاولة إخفاء شاشة التحميل...');
-    
-    // 1. إخفاء شاشة التحميل
-    const loading = document.getElementById('loadingScreen');
-    if (loading) {
-        loading.style.opacity = '0';
-        loading.style.transition = 'opacity 0.5s ease';
-        
-        setTimeout(() => {
-            loading.style.display = 'none';
-            console.log('✅ تم إخفاء شاشة التحميل');
-        }, 500);
-    } else {
-        console.log('⚠️ عنصر loadingScreen غير موجود');
-    }
-    
-    // 2. إظهار التطبيق
-    const app = document.getElementById('app');
-    if (app) {
-        app.style.display = 'flex';
-        console.log('✅ تم إظهار التطبيق');
-    } else {
-        console.log('⚠️ عنصر app غير موجود');
-    }
-    
-    // 3. إظهار شاشة الترحيب
-    const welcome = document.querySelector('.welcome-screen');
-    if (welcome) {
-        welcome.style.display = 'flex';
-        console.log('✅ تم إظهار شاشة الترحيب');
-    } else {
-        console.log('⚠️ عنصر welcome-screen غير موجود');
-    }
-    
-    // 4. تحميل المدن العراقية
-    loadCities();
-    
-    // 5. إعداد الأزرار
-    setupButtons();
-    
-    // 6. تحميل المستخدم الحالي إذا كان مسجل الدخول
-    checkLoggedInUser();
-}
-
-function loadCities() {
-    const citySelect = document.getElementById('registerCity');
-    if (citySelect) {
-        // مسح المحتوى القديم
-        citySelect.innerHTML = '';
-        
-        // إضافة الخيار الافتراضي
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = 'اختر المدينة';
-        citySelect.appendChild(defaultOption);
-        
-        // إضافة المدن العراقية
-        const cities = [
-            'بغداد', 'البصرة', 'الموصل', 'أربيل', 'السليمانية',
-            'كربلاء', 'النجف', 'بابل', 'واسط', 'صلاح الدين',
-            'ديالى', 'ذي قار', 'ميسان', 'القادسية', 'المثنى',
-            'الأنبار', 'نينوى', 'دهوك', 'كركوك', 'حلبجة'
-        ];
-        
-        cities.forEach(city => {
-            const option = document.createElement('option');
-            option.value = city;
-            option.textContent = city;
-            citySelect.appendChild(option);
+        // حل نهائي لمشكلة التحميل
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 بدء تحميل التطبيق...');
+            
+            // تحديث شريط التقدم
+            const progressBar = document.getElementById('progressBar');
+            const loadingStatus = document.getElementById('loadingStatus');
+            
+            // محاكاة عملية التحميل
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = progress + '%';
+                
+                if (progress <= 25) {
+                    loadingStatus.textContent = 'جاري تهيئة البيانات...';
+                } else if (progress <= 50) {
+                    loadingStatus.textContent = 'جاري تحميل الواجهة...';
+                } else if (progress <= 75) {
+                    loadingStatus.textContent = 'جاري الاتصال بالسيرفر...';
+                } else {
+                    loadingStatus.textContent = 'جاري إعداد التطبيق...';
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    
+                    // إخفاء شاشة التحميل بعد تأخير قصير
+                    setTimeout(() => {
+                        const loadingScreen = document.getElementById('loadingScreen');
+                        const app = document.getElementById('app');
+                        
+                        // إخفاء شاشة التحميل
+                        loadingScreen.classList.add('hidden');
+                        
+                        // إظهار التطبيق
+                        app.classList.add('ready');
+                        
+                        // تهيئة التطبيق
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            initializeApp();
+                        }, 500);
+                        
+                        console.log('✅ تم تحميل التطبيق بنجاح');
+                    }, 500);
+                }
+            }, 50);
         });
         
-        console.log('🏙️ تم تحميل ' + cities.length + ' مدينة');
-    }
-}
-
-function setupButtons() {
-    // أزرار المصادقة
-    const authButtons = document.querySelectorAll('.auth-btn');
-    authButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
+        function initializeApp() {
+            // تهيئة إدارة اللغات
+            if (typeof LanguageManager !== 'undefined') {
+                LanguageManager.init();
+            }
+            
+            // تهيئة الأحداث
+            setupEventListeners();
+            
+            // التحقق من تسجيل الدخول السابق
+            checkPreviousLogin();
+            
+            // إعداد الواجهة
+            setupUI();
+        }
+        
+        function setupEventListeners() {
+            // أزرار المصادقة
+            document.querySelectorAll('.auth-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const type = this.classList.contains('primary') ? 'register' : 'login';
+                    showAuthModal(type);
+                });
+            });
+            
+            // نماذج المصادقة
+            document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleLogin();
+            });
+            
+            document.getElementById('registerForm')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleRegister();
+            });
+            
+            // إغلاق النوافذ
+            document.querySelectorAll('.close-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const modal = this.closest('.modal');
+                    if (modal) {
+                        modal.classList.remove('show');
+                    }
+                });
+            });
+            
+            // أزرار التنقل
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+        
+        function setupUI() {
+            // إعداد اللغة
+            const lang = localStorage.getItem('chat_language') || 'ar';
+            changeLanguage(lang);
+            
+            // إعداد المدن
+            populateCities();
+            
+            // إخفاء شاشة الدردشة في البداية
+            document.getElementById('chatScreen').style.display = 'none';
+        }
+        
+        function checkPreviousLogin() {
+            const user = localStorage.getItem('currentUser');
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    updateUserInterface(userData);
+                    document.querySelector('.welcome-screen').classList.remove('active');
+                    document.getElementById('chatScreen').style.display = 'flex';
+                } catch (e) {
+                    console.error('خطأ في بيانات المستخدم:', e);
+                    localStorage.removeItem('currentUser');
+                }
+            }
+        }
+        
+        function updateUserInterface(user) {
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userAvatar').src = user.avatar || 
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
+            document.getElementById('userStatus').textContent = 'متصل';
+            document.getElementById('userStatus').className = 'status online';
+            
+            if (user.is_admin) {
+                document.getElementById('adminMenuItem').style.display = 'block';
+            }
+        }
+        
+        function populateCities() {
+            const cities = [
+                'بغداد', 'البصرة', 'الموصل', 'أربيل', 'السليمانية',
+                'كربلاء', 'النجف', 'بابل', 'واسط', 'صلاح الدين',
+                'ديالى', 'ذي قار', 'ميسان', 'القادسية', 'المثنى',
+                'الأنبار', 'نينوى', 'دهوك', 'كركوك', 'حلبجة'
+            ];
+            
+            const select = document.getElementById('registerCity');
+            if (select) {
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    select.appendChild(option);
+                });
+            }
+        }
+        
+        function showAuthModal(type) {
             const modal = document.getElementById('authModal');
-            if (modal) {
-                modal.classList.add('show');
-                console.log('🔓 فتح نافذة المصادقة');
+            modal.classList.add('show');
+            switchAuthTab(type);
+        }
+        
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.remove('show');
+        }
+        
+        function switchAuthTab(tabName) {
+            // أزرار التبويب
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // النماذج
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Form').classList.add('active');
+            
+            // العنوان
+            document.getElementById('modalTitle').textContent = 
+                tabName === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب';
+        }
+        
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling?.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.className = 'far fa-eye-slash';
+            } else {
+                input.type = 'password';
+                if (icon) icon.className = 'far fa-eye';
             }
-        });
-    });
-    
-    // أزرار الإغلاق
-    const closeButtons = document.querySelectorAll('.close-btn');
-    closeButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const modal = this.closest('.modal');
-            if (modal) {
-                modal.classList.remove('show');
-                console.log('❌ إغلاق النافذة');
+        }
+        
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showNotification('خطأ', 'الرجاء ملء جميع الحقول', 'error');
+                return;
             }
-        });
-    });
-    
-    // أزرار التبويبات
-    const tabs = document.querySelectorAll('.auth-tab');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabId = this.id.replace('Tab', '');
-            switchTab(tabId);
-        });
-    });
-    
-    console.log('🎯 تم إعداد ' + authButtons.length + ' زر مصادقة');
-}
-
-function switchTab(tabName) {
-    // إزالة الفعالية من جميع التبويبات
-    document.querySelectorAll('.auth-tab').forEach(t => {
-        t.classList.remove('active');
-    });
-    
-    // إخفاء جميع النماذج
-    document.querySelectorAll('.auth-form').forEach(f => {
-        f.classList.remove('active');
-    });
-    
-    // تفعيل التبويب المختار
-    const activeTab = document.getElementById(tabName + 'Tab');
-    const activeForm = document.getElementById(tabName + 'Form');
-    
-    if (activeTab) activeTab.classList.add('active');
-    if (activeForm) activeForm.classList.add('active');
-    
-    console.log('🔀 تم التبديل إلى تبويب: ' + tabName);
-}
-
-function checkLoggedInUser() {
-    const savedUser = localStorage.getItem('currentUser');
-    
-    if (savedUser) {
-        try {
-            const user = JSON.parse(savedUser);
-            console.log('👤 المستخدم مسجل الدخول: ' + user.name);
             
-            // تحديث واجهة المستخدم
-            updateUserInfo(user);
+            // تسجيل الدخول محلياً (للاختبار)
+            const mockUser = {
+                id: 'user_' + Date.now(),
+                name: 'أحمد العراقي',
+                username: 'ahmediraqi',
+                email: email,
+                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + email,
+                bio: 'مرحباً! أنا جديد في دردشة العراق',
+                age: 28,
+                city: 'بغداد',
+                is_admin: email === 'admin@iraqichat.com'
+            };
             
-            // إظهار شاشة الدردشة بدلاً من الترحيب
-            showChatScreen();
+            localStorage.setItem('currentUser', JSON.stringify(mockUser));
+            updateUserInterface(mockUser);
+            closeAuthModal();
+            document.querySelector('.welcome-screen').classList.remove('active');
+            document.getElementById('chatScreen').style.display = 'flex';
             
-        } catch (error) {
-            console.error('❌ خطأ في بيانات المستخدم:', error);
+            showNotification('نجاح', 'تم تسجيل الدخول بنجاح', 'success');
+        }
+        
+        function handleRegister() {
+            const name = document.getElementById('registerName').value;
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            if (!name || !username || !email || !password) {
+                showNotification('خطأ', 'الرجاء ملء جميع الحقول', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showNotification('خطأ', 'كلمتا المرور غير متطابقتين', 'error');
+                return;
+            }
+            
+            // تسجيل مستخدم جديد محلياً
+            const newUser = {
+                id: 'user_' + Date.now(),
+                name: name,
+                username: username,
+                email: email,
+                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + username,
+                bio: 'مرحباً! أنا جديد في دردشة العراق',
+                age: document.getElementById('registerAge').value || null,
+                city: document.getElementById('registerCity').value || '',
+                is_admin: email === 'admin@iraqichat.com'
+            };
+            
+            // حفظ في localStorage
+            let users = JSON.parse(localStorage.getItem('iraqi_chat_users') || '[]');
+            users.push(newUser);
+            localStorage.setItem('iraqi_chat_users', JSON.stringify(users));
+            
+            // تسجيل الدخول تلقائياً
+            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            updateUserInterface(newUser);
+            closeAuthModal();
+            document.querySelector('.welcome-screen').classList.remove('active');
+            document.getElementById('chatScreen').style.display = 'flex';
+            
+            showNotification('نجاح', 'تم إنشاء الحساب بنجاح', 'success');
+        }
+        
+        function showNotification(title, message, type = 'info') {
+            const notificationCenter = document.getElementById('notificationCenter');
+            if (!notificationCenter) return;
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <div class="notification-content">
+                    <h4>${title}</h4>
+                    <p>${message}</p>
+                </div>
+                <button class="notification-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            notificationCenter.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        // دالات وهمية للوظائف الأخرى
+        function toggleLanguageMenu() {
+            const menu = document.getElementById('languageMenu');
+            const current = document.querySelector('.current-language');
+            menu.classList.toggle('show');
+            current.classList.toggle('active');
+        }
+        
+        function changeLanguage(lang) {
+            localStorage.setItem('chat_language', lang);
+            location.reload();
+        }
+        
+        function toggleUserMenu() {
+            document.getElementById('userMenu').classList.toggle('show');
+        }
+        
+        function logout() {
             localStorage.removeItem('currentUser');
+            location.reload();
         }
-    } else {
-        console.log('👤 لا يوجد مستخدم مسجل الدخول');
-    }
-}
-
-function updateUserInfo(user) {
-    // تحديث الصورة الشخصية
-    const avatar = document.getElementById('userAvatar');
-    if (avatar && user.avatar) {
-        avatar.src = user.avatar;
-    }
-    
-    // تحديث الاسم
-    const name = document.getElementById('userName');
-    if (name) {
-        name.textContent = user.name;
-    }
-    
-    // تحديث الحالة
-    const status = document.getElementById('userStatus');
-    if (status) {
-        status.textContent = 'متصل';
-        status.className = 'status online';
-    }
-    
-    // إظهار زر المشرف إذا كان مشرفاً
-    if (user.is_admin) {
-        const adminBtn = document.getElementById('adminMenuItem');
-        if (adminBtn) {
-            adminBtn.style.display = 'block';
+        
+        function showPage(page) {
+            // إخفاء جميع الصفحات
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            document.querySelector('.welcome-screen').classList.remove('active');
+            document.getElementById('chatScreen').style.display = 'none';
+            
+            // إظهار الصفحة المطلوبة
+            if (page === 'chats') {
+                document.querySelector('.welcome-screen').classList.add('active');
+            } else if (page === 'chat') {
+                document.getElementById('chatScreen').style.display = 'flex';
+            } else {
+                document.getElementById(page + 'Page').style.display = 'block';
+            }
         }
-    }
-}
-
-function showChatScreen() {
-    const welcome = document.querySelector('.welcome-screen');
-    const chat = document.querySelector('.chat-screen');
-    
-    if (welcome) welcome.style.display = 'none';
-    if (chat) chat.style.display = 'flex';
-    
-    console.log('💬 تم إظهار شاشة الدردشة');
-}
-
-// ===== حل طارئ: إذا استمرت المشكلة =====
-window.addEventListener('load', function() {
-    console.log('📄 الصفحة محملة بالكامل');
-    
-    // الحل النهائي: إخفاء شاشة التحميل بأي طريقة
-    const loading = document.getElementById('loadingScreen');
-    if (loading && loading.style.display !== 'none') {
-        console.log('🚨 حالة طارئة: إخفاء شاشة التحميل بالقوة');
-        loading.style.display = 'none';
-    }
-    
-    const app = document.getElementById('app');
-    if (app && app.style.display !== 'flex') {
-        app.style.display = 'flex';
-    }
-});
-
-// حل نهائي: اضغط F12 في المتصفح وشاهد Console
-console.log('🔧 تطبيق دردشة العراق جاهز للتشغيل');
-console.log('ℹ️ إذا ظهرت "جاري التحميل..." اضغط F5 لإعادة التحميل');
-</script>
-
-<!-- حل إضافي: CSS لإخفاء شاشة التحميل تلقائياً -->
-<style>
-/* هذا CSS سيعمل حتى إذا فشل JavaScript */
-#loadingScreen {
-    animation: hideLoading 0.5s ease 3s forwards;
-}
-
-@keyframes hideLoading {
-    to {
-        opacity: 0;
-        visibility: hidden;
-    }
-}
-
-#app {
-    display: none;
-}
-
-#app.ready {
-    display: flex !important;
-}
-
-.welcome-screen {
-    display: none;
-}
-
-.welcome-screen.active {
-    display: flex !important;
-}
-</style>
-
-<script>
-// حل أخير: إضافة class جاهز بعد وقت قصير
-setTimeout(function() {
-    document.getElementById('app')?.classList.add('ready');
-    document.querySelector('.welcome-screen')?.classList.add('active');
-}, 1000);
-</script>
+        
+        function closeChat() {
+            document.getElementById('chatScreen').style.display = 'none';
+            document.querySelector('.welcome-screen').classList.add('active');
+        }
+        
+        function startChatWith(userId) {
+            // بدء محادثة جديدة
+            showPage('chat');
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                // إضافة الرسالة إلى الشاشة
+                const messagesDiv = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message sent';
+                messageDiv.innerHTML = `
+                    <div class="message-content">${message}</div>
+                    <div class="message-time">${new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'})}</div>
+                `;
+                
+                messagesDiv.appendChild(messageDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                
+                // مسح الحقل
+                input.value = '';
+                input.style.height = 'auto';
+            }
+        }
+        
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        // جعل الدوال متاحة عالمياً
+        window.showNotification = showNotification;
+        window.showAuthModal = showAuthModal;
+        window.closeAuthModal = closeAuthModal;
+        window.switchAuthTab = switchAuthTab;
+        window.togglePassword = togglePassword;
+        window.showPage = showPage;
+        window.closeChat = closeChat;
+        window.startChatWith = startChatWith;
+        window.sendMessage = sendMessage;
+        window.autoResize = autoResize;
+        window.handleKeyPress = handleKeyPress;
+    </script>
+</body>
 </html>
