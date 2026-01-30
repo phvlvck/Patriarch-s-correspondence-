@@ -354,57 +354,274 @@
     <!-- Emoji Picker Library -->
     <script src="https://cdn.jsdelivr.net/npm/@emoji-mart/data"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emoji-mart/web"></script>
+</body>
     <script>
-// حل سريع لمشكلة التحميل
-setTimeout(function() {
-    const loading = document.getElementById('loadingScreen');
-    const app = document.getElementById('app');
-    const welcome = document.querySelector('.welcome-screen');
+// ===== الحل النهائي لمشكلة التحميل =====
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 الصفحة محملة - بدء حل مشكلة التحميل...');
     
+    // الحل الفوري: إخفاء شاشة التحميل بعد تأخير قصير
+    setTimeout(hideLoadingScreen, 500);
+    
+    // بديل: إذا فشل الحل الأول، إعادة المحاولة
+    setTimeout(hideLoadingScreen, 2000);
+    setTimeout(hideLoadingScreen, 3000);
+});
+
+function hideLoadingScreen() {
+    console.log('🔄 محاولة إخفاء شاشة التحميل...');
+    
+    // 1. إخفاء شاشة التحميل
+    const loading = document.getElementById('loadingScreen');
     if (loading) {
-        loading.style.display = 'none';
-        console.log('✅ تم إخفاء شاشة التحميل');
+        loading.style.opacity = '0';
+        loading.style.transition = 'opacity 0.5s ease';
+        
+        setTimeout(() => {
+            loading.style.display = 'none';
+            console.log('✅ تم إخفاء شاشة التحميل');
+        }, 500);
+    } else {
+        console.log('⚠️ عنصر loadingScreen غير موجود');
     }
     
+    // 2. إظهار التطبيق
+    const app = document.getElementById('app');
     if (app) {
         app.style.display = 'flex';
         console.log('✅ تم إظهار التطبيق');
+    } else {
+        console.log('⚠️ عنصر app غير موجود');
     }
     
+    // 3. إظهار شاشة الترحيب
+    const welcome = document.querySelector('.welcome-screen');
     if (welcome) {
         welcome.style.display = 'flex';
         console.log('✅ تم إظهار شاشة الترحيب');
+    } else {
+        console.log('⚠️ عنصر welcome-screen غير موجود');
     }
     
-    // تحميل المدن العراقية
+    // 4. تحميل المدن العراقية
+    loadCities();
+    
+    // 5. إعداد الأزرار
+    setupButtons();
+    
+    // 6. تحميل المستخدم الحالي إذا كان مسجل الدخول
+    checkLoggedInUser();
+}
+
+function loadCities() {
     const citySelect = document.getElementById('registerCity');
     if (citySelect) {
-        const cities = ['بغداد', 'البصرة', 'الموصل', 'أربيل', 'السليمانية', 'كربلاء', 'النجف', 'بابل'];
+        // مسح المحتوى القديم
+        citySelect.innerHTML = '';
+        
+        // إضافة الخيار الافتراضي
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'اختر المدينة';
+        citySelect.appendChild(defaultOption);
+        
+        // إضافة المدن العراقية
+        const cities = [
+            'بغداد', 'البصرة', 'الموصل', 'أربيل', 'السليمانية',
+            'كربلاء', 'النجف', 'بابل', 'واسط', 'صلاح الدين',
+            'ديالى', 'ذي قار', 'ميسان', 'القادسية', 'المثنى',
+            'الأنبار', 'نينوى', 'دهوك', 'كركوك', 'حلبجة'
+        ];
+        
         cities.forEach(city => {
             const option = document.createElement('option');
             option.value = city;
             option.textContent = city;
             citySelect.appendChild(option);
         });
+        
+        console.log('🏙️ تم تحميل ' + cities.length + ' مدينة');
+    }
+}
+
+function setupButtons() {
+    // أزرار المصادقة
+    const authButtons = document.querySelectorAll('.auth-btn');
+    authButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modal = document.getElementById('authModal');
+            if (modal) {
+                modal.classList.add('show');
+                console.log('🔓 فتح نافذة المصادقة');
+            }
+        });
+    });
+    
+    // أزرار الإغلاق
+    const closeButtons = document.querySelectorAll('.close-btn');
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.classList.remove('show');
+                console.log('❌ إغلاق النافذة');
+            }
+        });
+    });
+    
+    // أزرار التبويبات
+    const tabs = document.querySelectorAll('.auth-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabId = this.id.replace('Tab', '');
+            switchTab(tabId);
+        });
+    });
+    
+    console.log('🎯 تم إعداد ' + authButtons.length + ' زر مصادقة');
+}
+
+function switchTab(tabName) {
+    // إزالة الفعالية من جميع التبويبات
+    document.querySelectorAll('.auth-tab').forEach(t => {
+        t.classList.remove('active');
+    });
+    
+    // إخفاء جميع النماذج
+    document.querySelectorAll('.auth-form').forEach(f => {
+        f.classList.remove('active');
+    });
+    
+    // تفعيل التبويب المختار
+    const activeTab = document.getElementById(tabName + 'Tab');
+    const activeForm = document.getElementById(tabName + 'Form');
+    
+    if (activeTab) activeTab.classList.add('active');
+    if (activeForm) activeForm.classList.add('active');
+    
+    console.log('🔀 تم التبديل إلى تبويب: ' + tabName);
+}
+
+function checkLoggedInUser() {
+    const savedUser = localStorage.getItem('currentUser');
+    
+    if (savedUser) {
+        try {
+            const user = JSON.parse(savedUser);
+            console.log('👤 المستخدم مسجل الدخول: ' + user.name);
+            
+            // تحديث واجهة المستخدم
+            updateUserInfo(user);
+            
+            // إظهار شاشة الدردشة بدلاً من الترحيب
+            showChatScreen();
+            
+        } catch (error) {
+            console.error('❌ خطأ في بيانات المستخدم:', error);
+            localStorage.removeItem('currentUser');
+        }
+    } else {
+        console.log('👤 لا يوجد مستخدم مسجل الدخول');
+    }
+}
+
+function updateUserInfo(user) {
+    // تحديث الصورة الشخصية
+    const avatar = document.getElementById('userAvatar');
+    if (avatar && user.avatar) {
+        avatar.src = user.avatar;
     }
     
-    // إعداد أزرار المصادقة
-    document.querySelectorAll('.auth-btn').forEach(btn => {
-        btn.onclick = function() {
-            const modal = document.getElementById('authModal');
-            if (modal) modal.classList.add('show');
-        };
-    });
+    // تحديث الاسم
+    const name = document.getElementById('userName');
+    if (name) {
+        name.textContent = user.name;
+    }
     
-    // زر إغلاق النافذة
-    document.querySelectorAll('.close-btn').forEach(btn => {
-        btn.onclick = function() {
-            const modal = this.closest('.modal');
-            if (modal) modal.classList.remove('show');
-        };
-    });
+    // تحديث الحالة
+    const status = document.getElementById('userStatus');
+    if (status) {
+        status.textContent = 'متصل';
+        status.className = 'status online';
+    }
     
-}, 1000); // انتظر ثانية واحدة فقط
-    </script>
-</body>
+    // إظهار زر المشرف إذا كان مشرفاً
+    if (user.is_admin) {
+        const adminBtn = document.getElementById('adminMenuItem');
+        if (adminBtn) {
+            adminBtn.style.display = 'block';
+        }
+    }
+}
+
+function showChatScreen() {
+    const welcome = document.querySelector('.welcome-screen');
+    const chat = document.querySelector('.chat-screen');
+    
+    if (welcome) welcome.style.display = 'none';
+    if (chat) chat.style.display = 'flex';
+    
+    console.log('💬 تم إظهار شاشة الدردشة');
+}
+
+// ===== حل طارئ: إذا استمرت المشكلة =====
+window.addEventListener('load', function() {
+    console.log('📄 الصفحة محملة بالكامل');
+    
+    // الحل النهائي: إخفاء شاشة التحميل بأي طريقة
+    const loading = document.getElementById('loadingScreen');
+    if (loading && loading.style.display !== 'none') {
+        console.log('🚨 حالة طارئة: إخفاء شاشة التحميل بالقوة');
+        loading.style.display = 'none';
+    }
+    
+    const app = document.getElementById('app');
+    if (app && app.style.display !== 'flex') {
+        app.style.display = 'flex';
+    }
+});
+
+// حل نهائي: اضغط F12 في المتصفح وشاهد Console
+console.log('🔧 تطبيق دردشة العراق جاهز للتشغيل');
+console.log('ℹ️ إذا ظهرت "جاري التحميل..." اضغط F5 لإعادة التحميل');
+</script>
+
+<!-- حل إضافي: CSS لإخفاء شاشة التحميل تلقائياً -->
+<style>
+/* هذا CSS سيعمل حتى إذا فشل JavaScript */
+#loadingScreen {
+    animation: hideLoading 0.5s ease 3s forwards;
+}
+
+@keyframes hideLoading {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+#app {
+    display: none;
+}
+
+#app.ready {
+    display: flex !important;
+}
+
+.welcome-screen {
+    display: none;
+}
+
+.welcome-screen.active {
+    display: flex !important;
+}
+</style>
+
+<script>
+// حل أخير: إضافة class جاهز بعد وقت قصير
+setTimeout(function() {
+    document.getElementById('app')?.classList.add('ready');
+    document.querySelector('.welcome-screen')?.classList.add('active');
+}, 1000);
+</script>
 </html>
