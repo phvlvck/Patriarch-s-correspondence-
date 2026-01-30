@@ -354,5 +354,57 @@
     <!-- Emoji Picker Library -->
     <script src="https://cdn.jsdelivr.net/npm/@emoji-mart/data"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emoji-mart/web"></script>
+    <script>
+// حل سريع لمشكلة التحميل
+setTimeout(function() {
+    const loading = document.getElementById('loadingScreen');
+    const app = document.getElementById('app');
+    const welcome = document.querySelector('.welcome-screen');
+    
+    if (loading) {
+        loading.style.display = 'none';
+        console.log('✅ تم إخفاء شاشة التحميل');
+    }
+    
+    if (app) {
+        app.style.display = 'flex';
+        console.log('✅ تم إظهار التطبيق');
+    }
+    
+    if (welcome) {
+        welcome.style.display = 'flex';
+        console.log('✅ تم إظهار شاشة الترحيب');
+    }
+    
+    // تحميل المدن العراقية
+    const citySelect = document.getElementById('registerCity');
+    if (citySelect) {
+        const cities = ['بغداد', 'البصرة', 'الموصل', 'أربيل', 'السليمانية', 'كربلاء', 'النجف', 'بابل'];
+        cities.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city;
+            option.textContent = city;
+            citySelect.appendChild(option);
+        });
+    }
+    
+    // إعداد أزرار المصادقة
+    document.querySelectorAll('.auth-btn').forEach(btn => {
+        btn.onclick = function() {
+            const modal = document.getElementById('authModal');
+            if (modal) modal.classList.add('show');
+        };
+    });
+    
+    // زر إغلاق النافذة
+    document.querySelectorAll('.close-btn').forEach(btn => {
+        btn.onclick = function() {
+            const modal = this.closest('.modal');
+            if (modal) modal.classList.remove('show');
+        };
+    });
+    
+}, 1000); // انتظر ثانية واحدة فقط
+    </script>
 </body>
 </html>
