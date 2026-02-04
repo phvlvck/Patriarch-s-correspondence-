@@ -1,131 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دردشة مباشرة - Patriarch's Correspondence</title>
-    <meta name="description" content="موقع دردشة مباشر يعمل بنظام Python مع تسجيل المستخدمين والدردشة في الوقت الحقيقي">
-    <meta name="author" content="Chat System">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
-</head>
-<body>
-    <!-- صفحة المصادقة -->
-    <div class="container" id="auth-container">
-        <div class="auth-box">
-            <h2><i class="fas fa-comments"></i> Patriarch's Correspondence</h2>
-            <p style="color: #666; margin-bottom: 30px; font-size: 16px;">
-                نظام دردشة آمن ومباشر مع تسجيل المستخدمين والدردشة في الوقت الحقيقي
-            </p>
-            
-            <div id="login-section">
-                <h3><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</h3>
-                <input type="text" id="login-username" placeholder="اسم المستخدم" data-tooltip="أدخل اسم المستخدم المسجل">
-                <input type="password" id="login-password" placeholder="كلمة المرور" data-tooltip="أدخل كلمة المرور">
-                <button onclick="login()">
-                    <i class="fas fa-sign-in-alt"></i> دخول إلى الدردشة
-                </button>
-                <p class="toggle-link" onclick="showRegister()">
-                    <i class="fas fa-user-plus"></i> ليس لديك حساب؟ إنشاء حساب جديد
-                </p>
-                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-right: 4px solid #6a11cb;">
-                    <p style="margin: 0; color: #666; font-size: 14px;">
-                        <i class="fas fa-info-circle"></i> 
-                        <strong>معلومات الاتصال:</strong> السيرفر يعمل على <code>192.168.0.107:5000</code>
-                    </p>
-                </div>
-            </div>
-            
-            <div id="register-section" style="display:none;">
-                <h3><i class="fas fa-user-plus"></i> تسجيل حساب جديد</h3>
-                <input type="text" id="register-username" placeholder="اسم المستخدم (3 أحرف على الأقل)" data-tooltip="يجب أن يكون 3 أحرف على الأقل">
-                <input type="password" id="register-password" placeholder="كلمة المرور (4 أحرف على الأقل)" data-tooltip="يجب أن تكون 4 أحرف على الأقل">
-                <input type="email" id="register-email" placeholder="البريد الإلكتروني" data-tooltip="للاسترجاع والإشعارات">
-                <button onclick="register()">
-                    <i class="fas fa-user-plus"></i> إنشاء الحساب
-                </button>
-                <p class="toggle-link" onclick="showLogin()">
-                    <i class="fas fa-sign-in-alt"></i> لديك حساب بالفعل؟ سجل الدخول
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- صفحة الدردشة -->
-    <div class="container" id="chat-container" style="display:none;">
-        <div class="chat-header">
-            <h2><i class="fas fa-comments"></i> غرفة الدردشة العامة</h2>
-            <button class="logout-btn" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-            </button>
-        </div>
-        
-        <div class="chat-sidebar">
-            <h3><i class="fas fa-users"></i> المستخدمون المتصلون 
-                <span id="online-count" style="background: #6a11cb; color: white; padding: 2px 10px; border-radius: 12px;">0</span>
-            </h3>
-            <ul id="online-users">
-                <li class="empty">جاري تحميل المستخدمين...</li>
-            </ul>
-            
-            <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #dee2e6;">
-                <h4 style="color: #2575fc; margin-bottom: 10px; font-size: 16px;">
-                    <i class="fas fa-info-circle"></i> معلومات النظام
-                </h4>
-                <div id="connection-status" style="font-size: 14px; color: #666;">
-                    <i class="fas fa-circle" style="color: #dc3545;"></i> جاري الاتصال...
-                </div>
-                <div id="user-status" style="font-size: 14px; color: #666; margin-top: 5px;">
-                    <i class="fas fa-user"></i> غير مسجل
-                </div>
-            </div>
-        </div>
-        
-        <div class="chat-main">
-            <div class="chat-messages" id="chat-messages">
-                <div class="message system">
-                    <div class="message-text">
-                        <i class="fas fa-rocket"></i> مرحباً بك في نظام الدردشة!
-                    </div>
-                    <div class="message-time">
-                        <i class="far fa-clock"></i> الآن
-                    </div>
-                </div>
-                <div class="message system">
-                    <div class="message-text">
-                        <i class="fas fa-bell"></i> سيتم تحميل الرسائل السابقة...
-                    </div>
-                    <div class="message-time">
-                        <i class="far fa-clock"></i> الآن
-                    </div>
-                </div>
-            </div>
-            
-            <!-- مؤشر الكتابة (يظهر تلقائياً) -->
-            <div id="typing-indicator" style="display:none;"></div>
-            
-            <div class="chat-input">
-                <input type="text" id="message-input" 
-                       placeholder="اكتب رسالتك هنا... (اضغط Enter للإرسال)" 
-                       onkeypress="handleKeyPress(event)"
-                       data-tooltip="اكتب رسالتك واضغط Enter أو انقر على زر الإرسال">
-                <button onclick="sendMessage()">
-                    <i class="fas fa-paper-plane"></i> إرسال
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- مكتبات JavaScript -->
-    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
-    <script src="app.js"></script>
-    
-    <!-- تنبيه تلقائي عند التحميل -->
-    <script>
-        window.addEventListener('load', function() {
-            console.log('✅ صفحة الدردشة جاهزة للاستخدام!');
-        });
-    </script>
-</body>
-</html>
